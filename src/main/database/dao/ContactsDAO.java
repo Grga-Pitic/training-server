@@ -19,8 +19,8 @@ import main.dto.base.ValueDTO;
 public class ContactsDAO extends AbstractDAO implements IDataAccessObject{
 
 	@Override
-	public List<IDataTransferObject> executeSelectQuery(String query) {
-		List <IDataTransferObject> contactList = new ArrayList<IDataTransferObject>();
+	public Map<Object, IDataTransferObject> executeSelectQuery(String query) {
+		Map<Object, IDataTransferObject> contactMap = new HashMap<Object, IDataTransferObject>();
 		try {
 			
 			ResultSet resultSet = executeQuery(query);
@@ -34,13 +34,13 @@ public class ContactsDAO extends AbstractDAO implements IDataAccessObject{
 				}
 				IDataTransferObject contact = new ContactDTO();
 				contact.setSerializedData(data);
-				contactList.add(contact);
+				contactMap.put(Integer.parseInt(data.get("id").getValue()), contact);
 				
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return contactList;
+		return contactMap;
 	}
 
 	@Override

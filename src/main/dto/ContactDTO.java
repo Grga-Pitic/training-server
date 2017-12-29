@@ -13,20 +13,20 @@ public class ContactDTO extends AbstractDTO implements IDataTransferObject {
 	
 	@Override
 	public void setSerializedData(Map <String, ValueDTO> data){
-
+		
 		super.setSerializedData(data);
-//		this.id      = Integer.parseInt(data.get("id"));
-//		this.userid1 = Integer.parseInt(data.get("userid1"));
-//		this.userid2 = Integer.parseInt(data.get("userid2"));
-	
+		this.id      = Integer.parseInt(data.get("id").getValue());
+		this.userid1 = Integer.parseInt(data.get("userid1").getValue());
+		this.userid2 = Integer.parseInt(data.get("userid2").getValue());
+		
 	}
 	
 	@Override
 	public Map<String, ValueDTO> getSerializedData(){
 	
-	//	put("id",      String.valueOf(id));
-	//	put("userid1", String.valueOf(id));
-	//	put("userid2", String.valueOf(id));
+		put("id",      String.valueOf(id));
+		put("userid1", String.valueOf(id));
+		put("userid2", String.valueOf(id));
 		return super.getSerializedData();
 		
 	}

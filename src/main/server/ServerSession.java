@@ -1,27 +1,43 @@
 package main.server;
 
+import java.net.ServerSocket;
 import java.util.List;
+import java.util.Map;
 
 import main.dto.ContactDTO;
 import main.dto.UserDTO;
 
 public class ServerSession {
-	private List <UserDTO>     userList;
-	private List <ContactDTO>  contactList; 
-	private List <UserSession> userSessionList;
 	
-	private int userSessionCount;
+	public static final int PORT = 6666;
 	
-	public ServerSession(List <UserDTO> userList, List <ContactDTO> contactList, 
-			List <UserSession> userSessionList){
+	
+	private Map  <String, UserDTO> userList;
+	private List <ContactDTO>      contactList; 
+	private List <UserSession>     userSessionList;
+	
+	private int          userSessionCount;
+	private ServerSocket serverSocket;
+	
+	public ServerSession(Map  <String, UserDTO> userList, List <ContactDTO> contactList, 
+			List <UserSession> userSessionList, ServerSocket serverSocket){
 		this.userList        = userList;
 		this.contactList     = contactList;
 		this.userSessionList = userSessionList;
+		this.serverSocket    = serverSocket;
 		
 		this.userSessionCount = 0;
 	}
 	
-	public List<UserDTO> getUserList() {
+	public ServerSocket getServerSocket(){
+		return this.serverSocket;
+	}
+	
+	public void setServerSocket(ServerSocket serverSocket){
+		this.serverSocket = serverSocket;
+	}
+	
+	public Map <String, UserDTO> getUserList() {
 		return userList;
 	}
 

@@ -1,16 +1,21 @@
 package main.server;
 
-public class UserSession {
+import java.net.Socket;
+
+public class UserSession implements Runnable {
 	private int    id;
 	private String key;
 	private int    userid;
 	
-	public UserSession(int id, String key, int userid){
+	private Socket socket;
+	
+	public UserSession(int id, Socket socket){
 		
 		this.id     = id;
 		this.key    = key;
 		this.userid = userid;
-	
+		this.socket = socket;
+		
 	}
 
 	public int getId() {
@@ -24,6 +29,9 @@ public class UserSession {
 	public int getUserid() {
 		return userid;
 	}
-	
-	
+
+	@Override
+	public void run() {
+		
+	}
 }
