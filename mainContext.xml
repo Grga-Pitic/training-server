@@ -7,6 +7,4 @@
 
  	<bean id="DBConnection" class="main.database.DBConnection" factory-method="getInstance"/>
 
-
-
 </beans>

@@ -1,6 +1,7 @@
 package main.server;
 
 import java.net.ServerSocket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,37 +13,43 @@ public class ServerSession {
 	public static final int PORT = 6666;
 	
 	
-	private Map  <String, UserDTO> userList;
-	private List <ContactDTO>      contactList; 
-	private List <UserSession>     userSessionList;
+	private Map <Object, UserDTO>    userMap;
+	private Map <Object, ContactDTO> contactMap; 
+	private List <UserSession>       userSessionList;
 	
 	private int          userSessionCount;
 	private ServerSocket serverSocket;
 	
-	public ServerSession(Map  <String, UserDTO> userList, List <ContactDTO> contactList, 
-			List <UserSession> userSessionList, ServerSocket serverSocket){
-		this.userList        = userList;
-		this.contactList     = contactList;
-		this.userSessionList = userSessionList;
-		this.serverSocket    = serverSocket;
+	private static ServerSession instance;
+	
+	public ServerSession(){
+		this.userSessionList = new ArrayList<UserSession>();
 		
 		this.userSessionCount = 0;
 	}
 	
+	public void setUserMap(Map<Object, UserDTO> userMap) {
+		this.userMap = userMap;
+	}
+
+	public void setContactMap(Map<Object, ContactDTO> contactMap) {
+		this.contactMap = contactMap;
+	}
+
+	public Map<Object, UserDTO> getUserMap() {
+		return userMap;
+	}
+
+	public Map<Object, ContactDTO> getContactMap() {
+		return contactMap;
+	}
+
 	public ServerSocket getServerSocket(){
 		return this.serverSocket;
 	}
 	
 	public void setServerSocket(ServerSocket serverSocket){
 		this.serverSocket = serverSocket;
-	}
-	
-	public Map <String, UserDTO> getUserList() {
-		return userList;
-	}
-
-	public List<ContactDTO> getContactList() {
-		return contactList;
 	}
 
 	public List<UserSession> getUserSessionList() {
@@ -55,6 +62,14 @@ public class ServerSession {
 	
 	public void incUserSessionCount(){
 		this.userSessionCount++;
+	}
+	
+	public static ServerSession getInstance(){
+		if(instance != null){
+			return instance;
+		}
+		instance = new ServerSession();
+		return instance;
 	}
 	
 }

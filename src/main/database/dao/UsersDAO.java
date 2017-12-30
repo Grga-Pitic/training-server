@@ -18,8 +18,8 @@ import main.dto.base.ValueDTO;
 public class UsersDAO extends AbstractDAO implements IDataAccessObject {
 	
 	@Override
-	public Map<Object, IDataTransferObject> executeSelectQuery(String query) {
-		Map <Object, IDataTransferObject> userMap = new HashMap<Object, IDataTransferObject>();
+	public Map<Object, UserDTO> executeSelectQuery(String query) {
+		Map <Object, UserDTO> userMap = new HashMap<Object, UserDTO>();
 		try {
 			
 			ResultSet resultSet = executeQuery(query);
@@ -31,7 +31,7 @@ public class UsersDAO extends AbstractDAO implements IDataAccessObject {
 					value.setValue(resultSet.getString(i));
 					data.put(resultSet.getMetaData().getColumnName(i), value);
 				}
-				IDataTransferObject user = new UserDTO();
+				UserDTO user = new UserDTO();
 				user.setSerializedData(data);
 				userMap.put(data.get("login").getValue(), user);
 				

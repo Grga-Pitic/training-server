@@ -12,15 +12,14 @@ import main.database.DBConnection;
 import main.database.dao.base.AbstractDAO;
 import main.database.dao.base.IDataAccessObject;
 import main.dto.ContactDTO;
-import main.dto.UserDTO;
 import main.dto.base.IDataTransferObject;
 import main.dto.base.ValueDTO;
 
 public class ContactsDAO extends AbstractDAO implements IDataAccessObject{
 
 	@Override
-	public Map<Object, IDataTransferObject> executeSelectQuery(String query) {
-		Map<Object, IDataTransferObject> contactMap = new HashMap<Object, IDataTransferObject>();
+	public Map<Object, ContactDTO> executeSelectQuery(String query) {
+		Map<Object, ContactDTO> contactMap = new HashMap<Object, ContactDTO>();
 		try {
 			
 			ResultSet resultSet = executeQuery(query);
@@ -32,7 +31,7 @@ public class ContactsDAO extends AbstractDAO implements IDataAccessObject{
 					value.setValue(resultSet.getString(i));
 					data.put(resultSet.getMetaData().getColumnName(i), value);
 				}
-				IDataTransferObject contact = new ContactDTO();
+				ContactDTO contact = new ContactDTO();
 				contact.setSerializedData(data);
 				contactMap.put(Integer.parseInt(data.get("id").getValue()), contact);
 				
