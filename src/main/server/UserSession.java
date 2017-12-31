@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Map;
 
+import main.database.DBConnection;
 import main.dto.UserDTO;
 import main.server.exception.AuthException;
+import main.server.exception.RegisterDataException;
 import main.server.services.UserSessionService;
 
 public class UserSession implements Runnable {
@@ -33,54 +35,44 @@ public class UserSession implements Runnable {
 	public void run() {
 		Map <Object, UserDTO> userMap = ServerSession.getInstance().getUserMap();
 		try {
-			try {
-				user = UserSessionService.getInstance().initSession(id, userMap, socket);
-			} catch (AuthException e) {
-				System.out.print("Invalid login/password\n");
-				e.printStackTrace();
+			while(!socket.isClosed()){
+				String query = in.readUTF();
+				if(query.substring(0, 4).equals("reg")){
+					try {
+						UserDTO user;
+						user = UserSessionService.getInstance().registerUser(query);
+						DBConnection.getInstance().getUsersDAO().executeInsertQuery(user);
+					} catch (RegisterDataException e) {
+						out.writeUTF("Invalid registration data");
+						out.flush();
+						e.printStackTrace();
+					}
+					continue;
+				}
+				
+				if(query.substring(0, 4).equals("auth")){
+					try {
+						user = UserSessionService.getInstance().initSession(id, userMap, socket, query);
+						out.writeUTF("auth success!");
+						out.flush();
+					} catch (AuthException e) {
+						System.out.print("Invalid login/password\n");
+						out.writeUTF("Invalid login/password");
+						out.flush();
+						e.printStackTrace();
+					}
+					continue;
+				}
+				socket.close();
+				in.close();
+				out.close();
 			}
-			out.writeUTF("you are connected");
-			out.flush();
-			socket.close();
-			in.close();
-			out.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private void initSession(Map<Object, UserDTO> userMap) throws IOException, AuthException{
-		String query    = in.readUTF().substring(5);
-		String login;
-		String password;
-		
-		int symbolCounter = 0;
-
-		while(symbolCounter < query.length()){
-			if(query.charAt(symbolCounter) == '&'){
-				break;
-			}
-			symbolCounter++;
-		}
-		
-		login    = query.substring(0, symbolCounter);
-		password = query.substring(symbolCounter+1, query.length());
-		UserDTO user = userMap.get(login);
-		
-		if(user == null){
-			out.writeUTF("Invalid login/password");
-			out.flush();
-			throw new AuthException();
-		}
-		if(!user.getPassword().equals(password)){
-			out.writeUTF("Invalid login/password");
-			out.flush();
-			throw new AuthException();
-		}
-		
-		
-	}
-
+	
 	public DataInputStream getIn() {
 		return in;
 	}
