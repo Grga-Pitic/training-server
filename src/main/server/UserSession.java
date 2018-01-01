@@ -4,18 +4,32 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import main.database.DBConnection;
+import main.dto.MessageDTO;
 import main.dto.UserDTO;
 import main.server.exception.AuthException;
+import main.server.exception.MessageDataException;
 import main.server.exception.RegisterDataException;
+import main.server.services.ServerSessionService;
 import main.server.services.UserSessionService;
 
 public class UserSession implements Runnable {
+	
+	private volatile boolean isOutFree;
+	private volatile boolean isInFree;
+	
 	private int     id;
 	private String  key;
 	private UserDTO user;
+	public UserDTO getUser() {
+		return user;
+	}
+
+	private List<MessageDTO> messageList;
 	
 	private Socket           socket;
 	private DataInputStream  in;
@@ -26,9 +40,9 @@ public class UserSession implements Runnable {
 		this.id     = id;
 		this.socket = socket;
 		
-		this.in     = new DataInputStream(socket.getInputStream());
-		this.out    = new DataOutputStream(socket.getOutputStream());
-		
+		this.in           = new DataInputStream(socket.getInputStream());
+		this.out          = new DataOutputStream(socket.getOutputStream());
+		this.messageList  = new ArrayList<MessageDTO>();
 	}
 	
 	@Override
@@ -37,11 +51,13 @@ public class UserSession implements Runnable {
 		try {
 			while(!socket.isClosed()){
 				String query = in.readUTF();
-				if(query.substring(0, 4).equals("reg")){
+				if(query.substring(0, 3).equals("reg")){
 					try {
 						UserDTO user;
 						user = UserSessionService.getInstance().registerUser(query);
 						DBConnection.getInstance().getUsersDAO().executeInsertQuery(user);
+						out.writeUTF("You're registered!");
+						out.flush();
 					} catch (RegisterDataException e) {
 						out.writeUTF("Invalid registration data");
 						out.flush();
@@ -63,6 +79,19 @@ public class UserSession implements Runnable {
 					}
 					continue;
 				}
+				
+				if(query.substring(0, 3).equals("msg")){
+					try {
+						MessageDTO message = UserSessionService.getInstance().getMessage(query, user);
+						ServerSession.getInstance().getMessageList().add(message);
+					} catch (MessageDataException e) {
+						out.writeUTF("Invalid message");
+						out.flush();
+						e.printStackTrace();
+					}
+					
+					continue;
+				}
 				socket.close();
 				in.close();
 				out.close();
@@ -73,6 +102,10 @@ public class UserSession implements Runnable {
 	}
 	
 	
+	public List<MessageDTO> getMessageList() {
+		return messageList;
+	}
+
 	public DataInputStream getIn() {
 		return in;
 	}
@@ -89,4 +122,20 @@ public class UserSession implements Runnable {
 		return key;
 	}
 
+	public synchronized boolean isOutFree() {
+		return isOutFree;
+	}
+
+	public synchronized void setOutFree(boolean isOutFree) {
+		this.isOutFree = isOutFree;
+	}
+
+	public synchronized boolean isInFree() {
+		return isInFree;
+	}
+
+	public synchronized void setInFree(boolean isInFree) {
+		this.isInFree = isInFree;
+	}
+	
 }

@@ -8,32 +8,32 @@ import main.dto.base.ValueDTO;
 
 public class MessageDTO extends AbstractDTO implements IDataTransferObject {
 	private String message;
-	private int    fromID;
-	private int    toID;
+	private String fromLogin;
+	private String toLogin;
 	
 	@Override
 	public void setSerializedData(Map <String, ValueDTO> data){
 		super.setSerializedData(data);
 		this.message = data.get("message").getValue();
-		this.fromID  = Integer.parseInt(data.get("fromID").getValue());
-		this.toID    = Integer.parseInt(data.get("toID").getValue());
+		this.fromLogin  = data.get("fromLogin").getValue();
+		this.toLogin    = data.get("toLogin").getValue();
 	}
 	
 	public Map<String, ValueDTO> getSerializedData(){
 		put("message", message);
-		put("fromID", String.valueOf(fromID));
-		put("toID", String.valueOf(toID));
+		put("fromLogin", String.valueOf(fromLogin));
+		put("toLogin", String.valueOf(toLogin));
 		return getSerializedData();
 	}
 	
 	public String getMessage() {
 		return message;
 	}
-	public int getFromID() {
-		return fromID;
+	public String getFromLogin() {
+		return fromLogin;
 	}
-	public int getToID() {
-		return toID;
+	public String getToLogin() {
+		return toLogin;
 	}
 	
 	

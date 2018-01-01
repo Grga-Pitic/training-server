@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import main.dto.ContactDTO;
+import main.dto.MessageDTO;
 import main.dto.UserDTO;
 
 public class ServerSession {
@@ -13,9 +14,10 @@ public class ServerSession {
 	public static final int PORT = 6666;
 	
 	
-	private Map <Object, UserDTO>    userMap;
-	private Map <Object, ContactDTO> contactMap; 
-	private List <UserSession>       userSessionList;
+	private Map  <Object, UserDTO>    userMap;
+	private Map  <Object, ContactDTO> contactMap; 
+	private List <UserSession>        userSessionList;
+	private List <MessageDTO>         messageList; 
 	
 	private int          userSessionCount;
 	private ServerSocket serverSocket;
@@ -24,10 +26,15 @@ public class ServerSession {
 	
 	public ServerSession(){
 		this.userSessionList = new ArrayList<UserSession>();
+		this.messageList     = new ArrayList<MessageDTO>();
 		
 		this.userSessionCount = 0;
 	}
 	
+	public List<MessageDTO> getMessageList() {
+		return messageList;
+	}
+
 	public void setUserMap(Map<Object, UserDTO> userMap) {
 		this.userMap = userMap;
 	}
@@ -64,7 +71,7 @@ public class ServerSession {
 		this.userSessionCount++;
 	}
 	
-	public static ServerSession getInstance(){
+	public synchronized static ServerSession getInstance(){
 		if(instance != null){
 			return instance;
 		}
