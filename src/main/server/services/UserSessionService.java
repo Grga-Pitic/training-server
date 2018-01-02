@@ -1,7 +1,5 @@
 package main.server.services;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
@@ -92,7 +90,7 @@ public class UserSessionService {
 		Map <String, ValueDTO> data      = new HashMap<String, ValueDTO>();
 		String []              arrayData = query.split("&");
 		
-		if(arrayData.length != 3){
+		if(arrayData.length != 2){
 			throw new MessageDataException();
 		}
 		

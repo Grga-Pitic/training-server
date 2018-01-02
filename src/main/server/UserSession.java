@@ -43,6 +43,8 @@ public class UserSession implements Runnable {
 		this.in           = new DataInputStream(socket.getInputStream());
 		this.out          = new DataOutputStream(socket.getOutputStream());
 		this.messageList  = new ArrayList<MessageDTO>();
+		
+		this.isOutFree    = true;
 	}
 	
 	@Override
@@ -50,17 +52,22 @@ public class UserSession implements Runnable {
 		Map <Object, UserDTO> userMap = ServerSession.getInstance().getUserMap();
 		try {
 			while(!socket.isClosed()){
-				String query = in.readUTF();
+				String query = in.readUTF(); // TODO обработать java.io.EOFException
+				
 				if(query.substring(0, 3).equals("reg")){
 					try {
 						UserDTO user;
 						user = UserSessionService.getInstance().registerUser(query);
 						DBConnection.getInstance().getUsersDAO().executeInsertQuery(user);
+						isOutFree = false;
 						out.writeUTF("You're registered!");
 						out.flush();
+						isOutFree = true;
 					} catch (RegisterDataException e) {
+						isOutFree = false;
 						out.writeUTF("Invalid registration data");
 						out.flush();
+						isOutFree = true;
 						e.printStackTrace();
 					}
 					continue;
@@ -69,24 +76,31 @@ public class UserSession implements Runnable {
 				if(query.substring(0, 4).equals("auth")){
 					try {
 						user = UserSessionService.getInstance().initSession(id, userMap, socket, query);
+						isOutFree = false;
 						out.writeUTF("auth success!");
 						out.flush();
+						isOutFree = true;
 					} catch (AuthException e) {
 						System.out.print("Invalid login/password\n");
+						isOutFree = false;
 						out.writeUTF("Invalid login/password");
 						out.flush();
+						isOutFree = true;
 						e.printStackTrace();
 					}
 					continue;
 				}
-				
+				System.out.print("got: '"+query+"' from: "+user.getLogin()+"\n");
 				if(query.substring(0, 3).equals("msg")){
 					try {
+						System.out.print("try to add message to stack\n");
 						MessageDTO message = UserSessionService.getInstance().getMessage(query, user);
 						ServerSession.getInstance().getMessageList().add(message);
 					} catch (MessageDataException e) {
+						isOutFree = false;
 						out.writeUTF("Invalid message");
 						out.flush();
+						isOutFree = true;
 						e.printStackTrace();
 					}
 					

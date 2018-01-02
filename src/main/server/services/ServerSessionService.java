@@ -29,7 +29,10 @@ public class ServerSessionService {
 			@Override
 			public void run() {
 				try {
-					checkAndSendMessage();
+					for(;;){
+						checkAndSendMessage();
+					}
+					
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
@@ -62,15 +65,18 @@ public class ServerSessionService {
 	private void checkAndSendMessage() throws InterruptedException, IOException{
 		List <UserSession> sessionList = session.getUserSessionList();
 		List <MessageDTO>  messageList = session.getMessageList();
-		
+	//	System.out.print(sessionList.size()+" "+messageList.size()+"\n");
 		for(int i = 0; i < messageList.size(); i++){
 			MessageDTO message = messageList.get(i);
 			for(UserSession userSession:sessionList){
 				if(userSession.getUser().getLogin().equals(message.getToLogin())){
+					
 					while(true){
 						if(userSession.isOutFree()){
+							userSession.setOutFree(false);
 							sendMessage(message, userSession.getOut());
 							messageList.remove(i);
+							userSession.setOutFree(true);
 							break;
 						}
 						Thread.sleep(1);

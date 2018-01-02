@@ -36,5 +36,9 @@ public class MessageDTO extends AbstractDTO implements IDataTransferObject {
 		return toLogin;
 	}
 	
+	@Override
+	public String toString(){
+		return "text: "+this.message;
+	}
 	
 }
