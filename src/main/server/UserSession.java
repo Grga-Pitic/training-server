@@ -2,6 +2,7 @@ package main.server;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -52,7 +53,13 @@ public class UserSession implements Runnable {
 		Map <Object, UserDTO> userMap = ServerSession.getInstance().getUserMap();
 		try {
 			while(!socket.isClosed()){
-				String query = in.readUTF(); // TODO обработать java.io.EOFException
+				String query;
+				try {
+					query = in.readUTF(); 
+				} catch (EOFException e){
+					e.printStackTrace();
+					break;
+				}
 				
 				if(query.substring(0, 3).equals("reg")){
 					try {
@@ -90,10 +97,9 @@ public class UserSession implements Runnable {
 					}
 					continue;
 				}
-				System.out.print("got: '"+query+"' from: "+user.getLogin()+"\n");
+
 				if(query.substring(0, 3).equals("msg")){
 					try {
-						System.out.print("try to add message to stack\n");
 						MessageDTO message = UserSessionService.getInstance().getMessage(query, user);
 						ServerSession.getInstance().getMessageList().add(message);
 					} catch (MessageDataException e) {

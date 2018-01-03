@@ -99,7 +99,7 @@ public class UserSessionService {
 		data.put("message", column);
 		
 		column = new ValueDTO("VARCHAR");
-		column.setValue(String.valueOf(user.getId()));
+		column.setValue(String.valueOf(user.getLogin()));
 		data.put("fromLogin", column);
 		
 		column = new ValueDTO("VARCHAR");

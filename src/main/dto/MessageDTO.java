@@ -14,7 +14,7 @@ public class MessageDTO extends AbstractDTO implements IDataTransferObject {
 	@Override
 	public void setSerializedData(Map <String, ValueDTO> data){
 		super.setSerializedData(data);
-		this.message = data.get("message").getValue();
+		this.message    = data.get("message").getValue();
 		this.fromLogin  = data.get("fromLogin").getValue();
 		this.toLogin    = data.get("toLogin").getValue();
 	}
