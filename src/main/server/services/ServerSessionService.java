@@ -68,8 +68,10 @@ public class ServerSessionService {
 		for(int i = 0; i < messageList.size(); i++){
 			MessageDTO message = messageList.get(i);
 			for(UserSession userSession:sessionList){
+				if(userSession.getSocket().isClosed()){
+					continue;
+				}
 				if(userSession.getUser().getLogin().equals(message.getToLogin())){
-					
 					while(true){
 						if(userSession.isOutFree()){
 							userSession.setOutFree(false);

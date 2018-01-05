@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,10 @@ import main.server.services.UserSessionService;
 
 public class UserSession implements Runnable {
 	
+	public Socket getSocket() {
+		return socket;
+	}
+
 	private volatile boolean isOutFree;
 	private volatile boolean isInFree;
 	
@@ -58,6 +63,21 @@ public class UserSession implements Runnable {
 					query = in.readUTF(); 
 				} catch (EOFException e){
 					e.printStackTrace();
+					socket.close();
+					in.close();
+					out.close();
+					break;
+				} catch (SocketException e) {
+					e.printStackTrace();
+					socket.close();
+					in.close();
+					out.close();
+					break;
+				} catch (Exception e) {
+					e.printStackTrace();
+					socket.close();
+					in.close();
+					out.close();
 					break;
 				}
 				
@@ -88,7 +108,7 @@ public class UserSession implements Runnable {
 						out.flush();
 						isOutFree = true;
 					} catch (AuthException e) {
-						System.out.print("Invalid login/password\n");
+				//		System.out.print("Invalid login/password\n");
 						isOutFree = false;
 						out.writeUTF("Invalid login/password");
 						out.flush();
@@ -112,9 +132,6 @@ public class UserSession implements Runnable {
 					
 					continue;
 				}
-				socket.close();
-				in.close();
-				out.close();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
