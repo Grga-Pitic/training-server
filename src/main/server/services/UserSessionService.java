@@ -3,8 +3,11 @@ package main.server.services;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
+import main.dto.ContactDTO;
 import main.dto.MessageDTO;
 import main.dto.UserDTO;
 import main.dto.base.ValueDTO;
@@ -111,6 +114,27 @@ public class UserSessionService {
 		return message;
 	}
 	
+	public synchronized List <UserDTO> getUserContacts(Map<Object, ContactDTO> contactsMap, Map<Object, 
+													   UserDTO> userMap, UserDTO user){
+		List <UserDTO> userList = new LinkedList(); 
+		for(Object contactId:contactsMap.keySet()) {
+			if(contactsMap.get(contactId).getUserid1() != user.getId()){
+				continue;
+			}
+			for(Object login:userMap.keySet()){
+				if(userMap.get(login).getId() == contactsMap.get(contactId).getUserid2()){
+					userList.add(userMap.get(login));
+				}
+			}
+		}
+		return userList;
+	}
+	
+	public synchronized String getContactQuery(UserDTO user){
+		String query = "contact:"+user.getLogin()+"&"+user.getNickname();
+		return query;
+	}
+	
 	public synchronized static UserSessionService getInstance(){
 		if(instance != null){
 			return instance;
@@ -118,6 +142,8 @@ public class UserSessionService {
 		instance = new UserSessionService();
 		return instance;
 	}
+	
+
 	
 	public void closeSession(){
 		

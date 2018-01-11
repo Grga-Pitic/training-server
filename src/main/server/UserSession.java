@@ -11,19 +11,17 @@ import java.util.List;
 import java.util.Map;
 
 import main.database.DBConnection;
+import main.dto.ContactDTO;
 import main.dto.MessageDTO;
 import main.dto.UserDTO;
 import main.server.exception.AuthException;
 import main.server.exception.MessageDataException;
 import main.server.exception.RegisterDataException;
-import main.server.services.ServerSessionService;
 import main.server.services.UserSessionService;
 
 public class UserSession implements Runnable {
 	
-	public Socket getSocket() {
-		return socket;
-	}
+
 
 	private volatile boolean isOutFree;
 	private volatile boolean isInFree;
@@ -31,9 +29,6 @@ public class UserSession implements Runnable {
 	private int     id;
 	private String  key;
 	private UserDTO user;
-	public UserDTO getUser() {
-		return user;
-	}
 
 	private List<MessageDTO> messageList;
 	
@@ -55,7 +50,8 @@ public class UserSession implements Runnable {
 	
 	@Override
 	public void run() {
-		Map <Object, UserDTO> userMap = ServerSession.getInstance().getUserMap();
+		Map <Object, UserDTO>    userMap    = ServerSession.getInstance().getUserMap();
+		Map <Object, ContactDTO> contactMap = ServerSession.getInstance().getContactMap();
 		try {
 			while(!socket.isClosed()){
 				String query;
@@ -86,15 +82,26 @@ public class UserSession implements Runnable {
 						UserDTO user;
 						user = UserSessionService.getInstance().registerUser(query);
 						DBConnection.getInstance().getUsersDAO().executeInsertQuery(user);
-						isOutFree = false;
-						out.writeUTF("You're registered!");
-						out.flush();
-						isOutFree = true;
+						for(;;){
+							if(isOutFree){
+								isOutFree = false;
+								out.writeUTF("You're registered!");
+								out.flush();
+								isOutFree = true;
+								break;
+							}
+						}
+						
 					} catch (RegisterDataException e) {
-						isOutFree = false;
-						out.writeUTF("Invalid registration data");
-						out.flush();
-						isOutFree = true;
+						for(;;){
+							if(isOutFree){
+								isOutFree = false;
+								out.writeUTF("Invalid registration data");
+								out.flush();
+								isOutFree = true;
+								break;
+							}
+						}
 						e.printStackTrace();
 					}
 					continue;
@@ -103,16 +110,25 @@ public class UserSession implements Runnable {
 				if(query.substring(0, 4).equals("auth")){
 					try {
 						user = UserSessionService.getInstance().initSession(id, userMap, socket, query);
-						isOutFree = false;
-						out.writeUTF("auth success!");
-						out.flush();
-						isOutFree = true;
+						for(;;){
+							if(isOutFree){
+								isOutFree = false;
+								out.writeUTF("auth success!");
+								out.flush();
+								isOutFree = true;
+								break;
+							}
+						}
 					} catch (AuthException e) {
-				//		System.out.print("Invalid login/password\n");
-						isOutFree = false;
-						out.writeUTF("Invalid login/password");
-						out.flush();
-						isOutFree = true;
+						for(;;){
+							if(isOutFree){
+								isOutFree = false;
+								out.writeUTF("Invalid login/password");
+								out.flush();
+								isOutFree = true;
+								break;
+							}
+						}
 						e.printStackTrace();
 					}
 					continue;
@@ -123,14 +139,36 @@ public class UserSession implements Runnable {
 						MessageDTO message = UserSessionService.getInstance().getMessage(query, user);
 						ServerSession.getInstance().getMessageList().add(message);
 					} catch (MessageDataException e) {
-						isOutFree = false;
-						out.writeUTF("Invalid message");
-						out.flush();
-						isOutFree = true;
+						for(;;){
+							if(isOutFree){
+								isOutFree = false;
+								out.writeUTF("Invalid message");
+								out.flush();
+								isOutFree = true;
+								break;
+							}
+						}
 						e.printStackTrace();
 					}
 					
 					continue;
+				}
+				
+				if(query.equals("contacts")){
+					
+					List <UserDTO> contactUserList = UserSessionService.getInstance().getUserContacts(contactMap, userMap, user);
+					System.out.print(String.valueOf(contactMap.size())+"\n");
+					System.out.print(String.valueOf(userMap.size())+"\n");
+					for(;;){
+						if(isOutFree){
+							isOutFree = false;
+							for(UserDTO contact:contactUserList){
+								out.writeUTF(UserSessionService.getInstance().getContactQuery(contact));
+							}
+							isOutFree = true;
+							break;
+						}
+					}
 				}
 			}
 		} catch (IOException e) {
@@ -173,6 +211,14 @@ public class UserSession implements Runnable {
 
 	public synchronized void setInFree(boolean isInFree) {
 		this.isInFree = isInFree;
+	}
+	
+	public Socket getSocket() {
+		return socket;
+	}
+	
+	public UserDTO getUser() {
+		return user;
 	}
 	
 }
