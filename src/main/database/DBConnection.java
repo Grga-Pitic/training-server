@@ -1,6 +1,5 @@
 package main.database;
 
-import java.io.ObjectInputStream.GetField;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -38,9 +37,8 @@ public class DBConnection {
 	
 	public synchronized static DBConnection getInstance(){
 		if(instance != null){
-			return instance;
+			instance = new DBConnection();
 		}
-		instance = new DBConnection();
 		return instance;
 	}
 
@@ -50,17 +48,15 @@ public class DBConnection {
 	
 	public IDataAccessObject getUsersDAO(){
 		if(usersDAO != null){
-			return this.usersDAO;
+			usersDAO = new UsersDAO();
 		}
-		usersDAO = new UsersDAO();
 		return this.usersDAO;
 	}
 	
 	public IDataAccessObject getContactsDAO(){
-		if(contactsDAO != null){
-			return this.contactsDAO;
+		if(contactsDAO == null){
+			contactsDAO = (IDataAccessObject) new ContactsDAO();
 		}
-		contactsDAO = (IDataAccessObject) new ContactsDAO();
 		return this.contactsDAO;
 	}
 }
