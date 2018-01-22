@@ -12,6 +12,8 @@ import main.database.DBConnection;
 import main.dto.ContactDTO;
 import main.dto.UserDTO;
 import main.server.ServerSession;
+import main.server.managers.ConsoleManager;
+import main.server.managers.base.IManager;
 import main.server.services.ServerSessionService;
 
 public class Activator {
@@ -29,8 +31,12 @@ public class Activator {
 			serverSession.setUserMap(users);
 			serverSession.setServerSocket(new ServerSocket(ServerSession.PORT));
 			
+			IManager manager = new ConsoleManager(serverSession);
+			manager.run();
+			/*
 			ServerSessionService serverService = new ServerSessionService(serverSession);
 			serverService.run(serverSession);
+			*/
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

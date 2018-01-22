@@ -4,6 +4,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.LinkedList;
 import java.util.List;
 
 import main.dto.MessageDTO;
@@ -21,10 +22,11 @@ public class ServerSessionService {
 	}
 	
 	public void run(ServerSession session) {
-		ServerSocket serverSocket = session.getServerSocket();
+		ServerSocket serverSocket          = session.getServerSocket();
 		List <UserSession> userSessionList = session.getUserSessionList();
+		List <Thread> sessionThreadList    = session.getSessionThreadList();
 		
-		new Thread(new Runnable(){
+		Thread checkingThread = new Thread(new Runnable(){
 
 			@Override
 			public void run() {
@@ -40,7 +42,10 @@ public class ServerSessionService {
 				}
 			}
 			
-		}).start();
+		});
+		
+		checkingThread.start();
+		session.setCheckingThread(checkingThread);
 		
 		while(!serverSocket.isClosed()){
 			try {
@@ -49,8 +54,11 @@ public class ServerSessionService {
 				System.out.print("Connection complete\n");
 				UserSession userSession = new UserSession(session.getUserSessionCount(), socket);
 				userSessionList.add(userSession);
-				new Thread(userSession).start();
-				System.out.print("Started new thread\n");
+				
+				Thread thread = new Thread(userSession);
+				sessionThreadList.add(thread);
+				thread.start();
+		//		System.out.print("Started new thread\n");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -91,7 +99,4 @@ public class ServerSessionService {
 		Thread.sleep(1);
 	}
 
-	private String generateKey(){
-		return "0000";
-	}
 }

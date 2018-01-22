@@ -36,7 +36,7 @@ public class DBConnection {
 	}
 	
 	public synchronized static DBConnection getInstance(){
-		if(instance != null){
+		if(instance == null){
 			instance = new DBConnection();
 		}
 		return instance;
@@ -47,7 +47,7 @@ public class DBConnection {
 	}
 	
 	public IDataAccessObject getUsersDAO(){
-		if(usersDAO != null){
+		if(usersDAO == null){
 			usersDAO = new UsersDAO();
 		}
 		return this.usersDAO;

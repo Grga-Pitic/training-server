@@ -2,6 +2,7 @@ package main.server;
 
 import java.net.ServerSocket;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,11 +23,18 @@ public class ServerSession {
 	private int          userSessionCount;
 	private ServerSocket serverSocket;
 	
+	private List <Thread> sessionThreadList;
+	private Thread        checkingThread;
+	
+	private boolean needCloseThreads;
+	
 	private static ServerSession instance;
 	
 	public ServerSession(){
 		this.userSessionList = new ArrayList<UserSession>();
 		this.messageList     = new ArrayList<MessageDTO>();
+		
+		this.sessionThreadList = new LinkedList<Thread>();
 		
 		this.userSessionCount = 0;
 	}
@@ -71,11 +79,26 @@ public class ServerSession {
 		this.userSessionCount++;
 	}
 	
+	public List<Thread> getSessionThreadList() {
+		return sessionThreadList;
+	}
+
+	public void setSessionThreadList(List<Thread> sessionThreadList) {
+		this.sessionThreadList = sessionThreadList;
+	}
+
+	public Thread getCheckingThread() {
+		return checkingThread;
+	}
+
+	public void setCheckingThread(Thread checkingThread) {
+		this.checkingThread = checkingThread;
+	}
+	
 	public synchronized static ServerSession getInstance(){
-		if(instance != null){
-			return instance;
+		if(instance == null){
+			instance = new ServerSession();
 		}
-		instance = new ServerSession();
 		return instance;
 	}
 	
