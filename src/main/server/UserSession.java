@@ -157,8 +157,6 @@ public class UserSession implements Runnable {
 				if(query.equals("contacts")){
 					
 					List <UserDTO> contactUserList = UserSessionService.getInstance().getUserContacts(contactMap, userMap, user);
-					System.out.print(String.valueOf(contactMap.size())+"\n");
-					System.out.print(String.valueOf(userMap.size())+"\n");
 					for(;;){
 						if(isOutFree){
 							isOutFree = false;

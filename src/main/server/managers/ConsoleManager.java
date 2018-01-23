@@ -1,5 +1,8 @@
 package main.server.managers;
 
+import java.io.IOException;
+import java.util.Scanner;
+
 import javax.management.InstanceAlreadyExistsException;
 
 import main.server.ServerSession;
@@ -13,21 +16,19 @@ public class ConsoleManager extends AbstractManager implements IManager {
 	}
 
 	@Override
-	public void run() {
-		
+	public void run() throws IOException {
+		Scanner in = new Scanner(System.in);
 		for(;;){
-			String line = "start";
+			String line = in.nextLine();
 			
 			if(line.equalsIgnoreCase("start")){
 				startSession();
 			}
 			
-			if(line.equalsIgnoreCase("reset")) {
-				
-			}
-			
 			if(line.equalsIgnoreCase("exit")){
-				return;
+				
+				closeSession();
+				break;
 			}
 			
 		}
