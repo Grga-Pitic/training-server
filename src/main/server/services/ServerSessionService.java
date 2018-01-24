@@ -58,7 +58,6 @@ public class ServerSessionService {
 				Thread thread = new Thread(userSession);
 				sessionThreadList.add(thread);
 				thread.start();
-		//		System.out.print("Started new thread\n");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

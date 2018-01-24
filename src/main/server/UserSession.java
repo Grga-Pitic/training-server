@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import main.database.DBConnection;
 import main.dto.ContactDTO;
 import main.dto.MessageDTO;
 import main.dto.UserDTO;
+import main.dto.base.ValueDTO;
 import main.server.exception.AuthException;
 import main.server.exception.MessageDataException;
 import main.server.exception.RegisterDataException;
@@ -50,8 +52,10 @@ public class UserSession implements Runnable {
 	
 	@Override
 	public void run() {
-		Map <Object, UserDTO>    userMap    = ServerSession.getInstance().getUserMap();
-		Map <Object, ContactDTO> contactMap = ServerSession.getInstance().getContactMap();
+		Map <Object, UserDTO>    userMap     = ServerSession.getInstance().getUserMap();
+		Map <Object, ContactDTO> contactMap  = ServerSession.getInstance().getContactMap();
+		List <ContactDTO> 		 contactList = ServerSession.getInstance().getContactList(); 
+		
 		try {
 			while(!socket.isClosed()){
 				String query;
@@ -149,6 +153,54 @@ public class UserSession implements Runnable {
 							}
 						}
 						e.printStackTrace();
+					}
+					
+					continue;
+				}
+				if(query.substring(0, 3).equals("add")){
+					
+					ContactDTO contact = new ContactDTO();
+					
+					Map <String, ValueDTO> data = new HashMap<String, ValueDTO>();
+					ValueDTO value1 = new ValueDTO("int");
+					value1.setValue(String.valueOf(this.user.getId()));
+					ValueDTO value2 = new ValueDTO("int");
+					UserDTO friend  = userMap.get((Object) query.substring(4));
+					
+					if(friend == null){
+						continue;
+					}
+					
+					value2.setValue(String.valueOf(friend.getId()));
+					ValueDTO value3 = new ValueDTO("int");
+					value3.setValue("-1");
+					data.put("userid1", value1);
+					data.put("userid2", value2);
+					data.put("id",      value3);
+					contact.setSerializedData(data);
+					boolean cont = false;
+					for(ContactDTO iterator:contactList){
+						if(contact.equals(iterator)){
+							cont = true;
+							continue;
+						}
+					}
+					
+					if(cont){
+						cont = false;
+						continue;
+					}
+					
+					DBConnection.getInstance().getContactsDAO().executeInsertQuery(contact);
+					contactList.add(contact);
+					
+					for(;;){
+						if(isOutFree){
+							isOutFree = false;
+							out.writeUTF(UserSessionService.getInstance().getContactQuery(friend));
+							isOutFree = true;
+							break;
+						}
 					}
 					
 					continue;

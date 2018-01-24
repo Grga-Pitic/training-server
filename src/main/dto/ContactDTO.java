@@ -25,8 +25,8 @@ public class ContactDTO extends AbstractDTO implements IDataTransferObject {
 	public Map<String, ValueDTO> getSerializedData(){
 	
 		put("id",      String.valueOf(id));
-		put("userid1", String.valueOf(id));
-		put("userid2", String.valueOf(id));
+		put("userid1", String.valueOf(userid1));
+		put("userid2", String.valueOf(userid2));
 		return super.getSerializedData();
 		
 	}
@@ -34,6 +34,27 @@ public class ContactDTO extends AbstractDTO implements IDataTransferObject {
 	@Override
 	public String toString(){
 		return "id = "+id+" userid1 = " + userid1+" userid2 = " + userid2;
+	}
+	
+	@Override 
+	public boolean equals(Object object) {
+		if(this == object){
+			return true;
+		}
+		if(object == null){
+			return false;
+		}
+		if(getClass() != object.getClass()){
+			return false;
+		}
+		ContactDTO contact = (ContactDTO) object;
+		if(this.userid1 != contact.userid1){
+			return false;
+		}
+		if(this.userid2 != contact.userid2){
+			return false;
+		}
+		return true;
 	}
 
 	public int getUserid1() {

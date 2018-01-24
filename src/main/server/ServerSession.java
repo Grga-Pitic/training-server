@@ -17,6 +17,7 @@ public class ServerSession {
 	
 	private Map  <Object, UserDTO>    userMap;
 	private Map  <Object, ContactDTO> contactMap; 
+	private List <ContactDTO> 		  contactList;
 	private List <UserSession>        userSessionList;
 	private List <MessageDTO>         messageList; 
 	
@@ -25,8 +26,6 @@ public class ServerSession {
 	
 	private List <Thread> sessionThreadList;
 	private Thread        checkingThread;
-	
-	private boolean needCloseThreads;
 	
 	private static ServerSession instance;
 	
@@ -95,6 +94,14 @@ public class ServerSession {
 		this.checkingThread = checkingThread;
 	}
 	
+	public List<ContactDTO> getContactList() {
+		return contactList;
+	}
+
+	public void setContactList(List<ContactDTO> contactList) {
+		this.contactList = contactList;
+	}
+
 	public synchronized static ServerSession getInstance(){
 		if(instance == null){
 			instance = new ServerSession();

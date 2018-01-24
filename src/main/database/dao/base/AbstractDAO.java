@@ -33,7 +33,7 @@ public class AbstractDAO {
 	
 	protected String getInsertQueryString(IDataTransferObject abstractDTO, String tableName){
 		String query      = "";
-		String columnSet = "";
+		String columnSet  = "";
 		String valueSet   = "";
 		
 		Map <String, ValueDTO> data = abstractDTO.getSerializedData();
