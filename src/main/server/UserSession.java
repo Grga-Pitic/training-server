@@ -68,7 +68,7 @@ public class UserSession implements Runnable {
 					out.close();
 					break;
 				} catch (SocketException e) {
-					e.printStackTrace();
+//					e.printStackTrace();
 					socket.close();
 					in.close();
 					out.close();
@@ -85,7 +85,11 @@ public class UserSession implements Runnable {
 					try {
 						UserDTO user;
 						user = UserSessionService.getInstance().registerUser(query);
+						if(userMap.keySet().contains((Object) user.getLogin())){
+							continue;
+						}
 						DBConnection.getInstance().getUsersDAO().executeInsertQuery(user);
+						userMap.put(user.getLogin(), user);
 						for(;;){
 							if(isOutFree){
 								isOutFree = false;
