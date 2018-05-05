@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,8 +13,33 @@ import main.database.DBConnection;
 import main.dto.UserDTO;
 import main.dto.base.IDataTransferObject;
 import main.dto.base.ValueDTO;
+import main.dto.factories.base.IDTOFactory;
 
 public class AbstractDAO {
+	
+	protected List<IDataTransferObject> executeSelectQuery(String query, IDTOFactory factory) {
+		List <IDataTransferObject> dtoList = new LinkedList<IDataTransferObject>();
+		try {
+			
+			ResultSet resultSet = executeQuery(query);
+			while(resultSet.next()){
+				
+				Map <String, ValueDTO> data = new HashMap<String, ValueDTO>();
+				for(int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++){
+					ValueDTO value = new ValueDTO(resultSet.getMetaData().getColumnTypeName(i));
+					value.setValue(resultSet.getString(i));
+					data.put(resultSet.getMetaData().getColumnName(i), value);
+				}
+				IDataTransferObject dto = factory.createDTO();
+				dto.setSerializedData(data);
+				dtoList.add(dto);
+				
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return dtoList;
+	}
 	
 	protected int executeUpdate(String query) throws SQLException{
 		
@@ -42,11 +68,13 @@ public class AbstractDAO {
 			if(column.equals("id")){
 				continue;
 			}
+			
 			columnSet += "`"+column+"`, ";
 			if(data.get(column).getType().equalsIgnoreCase("VARCHAR")){
 				valueSet += "'" +data.get(column).getValue()+ "', ";
 				continue;
 			}
+			
 			valueSet  += data.get(column).getValue()+", "; 
 		}
 		columnSet = columnSet.substring(0, columnSet.length()-2);
@@ -64,6 +92,7 @@ public class AbstractDAO {
 			if(column.equals("id")){
 				continue;
 			}
+			
 			bodyQuery += '`'+column+'`' + "=";
 			if(data.get(column).getType().equalsIgnoreCase("VARCHAR")){
 				bodyQuery += "'"+data.get(column).getValue()+"', ";

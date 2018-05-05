@@ -8,7 +8,6 @@ import java.sql.Statement;
 import main.database.dao.ContactsDAO;
 import main.database.dao.UsersDAO;
 import main.database.dao.base.IDataAccessObject;
-import main.dto.base.IDataTransferObject;
 
 public class DBConnection {
 	private static final String ADDRESS = "127.0.0.1";

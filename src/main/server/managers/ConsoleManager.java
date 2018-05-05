@@ -28,6 +28,7 @@ public class ConsoleManager extends AbstractManager implements IManager {
 			if(line.equalsIgnoreCase("exit")){
 				
 				closeSession();
+				System.exit(0);
 				break;
 			}
 			

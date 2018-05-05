@@ -3,7 +3,6 @@ package main.database.dao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,12 +13,22 @@ import main.database.dao.base.IDataAccessObject;
 import main.dto.UserDTO;
 import main.dto.base.IDataTransferObject;
 import main.dto.base.ValueDTO;
+import main.dto.factories.UserDTOFactory;
 
 public class UsersDAO extends AbstractDAO implements IDataAccessObject {
 	
 	@Override
-	public Map<Object, UserDTO> executeSelectQuery(String query) {
-		Map <Object, UserDTO> userMap = new HashMap<Object, UserDTO>();
+	public Map<Object, IDataTransferObject> executeSelectQuery(String query) {
+		Map <Object, IDataTransferObject> userMap = new HashMap<Object, IDataTransferObject>();
+		List<IDataTransferObject> userList =  super.executeSelectQuery(query, new UserDTOFactory());
+		
+		for(IDataTransferObject user:userList){
+			userMap.put(((UserDTO)user).getLogin(), user);
+		}
+		
+		return userMap;
+		
+		/*
 		try {
 			
 			ResultSet resultSet = executeQuery(query);
@@ -39,7 +48,8 @@ public class UsersDAO extends AbstractDAO implements IDataAccessObject {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return userMap;
+		*/
+		
 	}
 
 	@Override
