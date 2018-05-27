@@ -60,7 +60,17 @@ public class UserSession implements Runnable {
 			while(!socket.isClosed()){
 				String query;
 				try {
-					query = in.readUTF(); 
+//					query = in.readUTF();
+					
+					byte[] lenBytes = new byte[4];
+					in.read(lenBytes, 0, 4);
+					int len = (((lenBytes[3] & 0xff) << 24) | ((lenBytes[2] & 0xff) << 16) |
+			                  ((lenBytes[1] & 0xff) << 8) | (lenBytes[0] & 0xff));
+
+					byte[] receivedBytes = new byte[len];
+					in.read(receivedBytes, 0, len);
+					query = new String(receivedBytes, 0, len);
+					
 				} catch (EOFException e){
 					e.printStackTrace();
 					socket.close();
@@ -81,6 +91,10 @@ public class UserSession implements Runnable {
 					break;
 				}
 				
+				if(query.length() == 0) {
+					break;
+				}
+				
 				if(query.substring(0, 3).equals("reg")){
 					try {
 						UserDTO user;
@@ -90,26 +104,32 @@ public class UserSession implements Runnable {
 						}
 						DBConnection.getInstance().getUsersDAO().executeInsertQuery(user);
 						userMap.put(user.getLogin(), user);
-						for(;;){
-							if(isOutFree){
-								isOutFree = false;
-								out.writeUTF("You're registered!");
-								out.flush();
-								isOutFree = true;
-								break;
-							}
-						}
+						
+						sendMessage(out, "You're registered!");
+						
+//						for(;;){
+//							if(isOutFree){
+//								isOutFree = false;
+//								out.writeUTF("You're registered!");
+//								out.flush();
+//								isOutFree = true;
+//								break;
+//							}
+//						}
 						
 					} catch (RegisterDataException e) {
-						for(;;){
-							if(isOutFree){
-								isOutFree = false;
-								out.writeUTF("Invalid registration data");
-								out.flush();
-								isOutFree = true;
-								break;
-							}
-						}
+						
+						sendMessage(out, "Invalid registration data");
+						
+//						for(;;){
+//							if(isOutFree){
+//								isOutFree = false;
+//								out.writeUTF("Invalid registration data");
+//								out.flush();
+//								isOutFree = true;
+//								break;
+//							}
+//						}
 						e.printStackTrace();
 					}
 					continue;
@@ -118,25 +138,32 @@ public class UserSession implements Runnable {
 				if(query.substring(0, 4).equals("auth")){
 					try {
 						user = UserSessionService.getInstance().initSession(id, userMap, socket, query);
-						for(;;){
-							if(isOutFree){
-								isOutFree = false;
-								out.writeUTF("auth success!");
-								out.flush();
-								isOutFree = true;
-								break;
-							}
-						}
+						
+						sendMessage(out, "auth success!");
+						
+//						for(;;) {
+//							if(isOutFree){
+//								
+//								isOutFree = false;
+//								out.writeUTF("auth success!");
+//								out.flush();
+//								isOutFree = true;
+//								
+//								break;
+//							}
+//						}
+						
 					} catch (AuthException e) {
-						for(;;){
-							if(isOutFree){
-								isOutFree = false;
-								out.writeUTF("Invalid login/password");
-								out.flush();
-								isOutFree = true;
-								break;
-							}
-						}
+						sendMessage(out, "Invalid login/password");
+//						for(;;){
+//							if(isOutFree){
+//								isOutFree = false;
+//								out.writeUTF("Invalid login/password");
+//								out.flush();
+//								isOutFree = true;
+//								break;
+//							}
+//						}
 						e.printStackTrace();
 					}
 					continue;
@@ -147,15 +174,18 @@ public class UserSession implements Runnable {
 						MessageDTO message = UserSessionService.getInstance().getMessage(query, user);
 						ServerSession.getInstance().getMessageList().add(message);
 					} catch (MessageDataException e) {
-						for(;;){
-							if(isOutFree){
-								isOutFree = false;
-								out.writeUTF("Invalid message");
-								out.flush();
-								isOutFree = true;
-								break;
-							}
-						}
+						
+						sendMessage(out, "Invalid message");
+						
+//						for(;;){
+//							if(isOutFree){
+//								isOutFree = false;
+//								out.writeUTF("Invalid message");
+//								out.flush();
+//								isOutFree = true;
+//								break;
+//							}
+//						}
 						e.printStackTrace();
 					}
 					
@@ -198,14 +228,16 @@ public class UserSession implements Runnable {
 					DBConnection.getInstance().getContactsDAO().executeInsertQuery(contact);
 					contactList.add(contact);
 					
-					for(;;){
-						if(isOutFree){
-							isOutFree = false;
-							out.writeUTF(UserSessionService.getInstance().getContactQuery(friend));
-							isOutFree = true;
-							break;
-						}
-					}
+					sendMessage(out, UserSessionService.getInstance().getContactQuery(friend));
+					
+//					for(;;){
+//						if(isOutFree){
+//							isOutFree = false;
+//							out.writeUTF(UserSessionService.getInstance().getContactQuery(friend));
+//							isOutFree = true;
+//							break;
+//						}
+//					}
 					
 					continue;
 				}
@@ -213,16 +245,21 @@ public class UserSession implements Runnable {
 				if(query.equals("contacts")){
 					
 					List <UserDTO> contactUserList = UserSessionService.getInstance().getUserContacts(contactMap, userMap, user);
-					for(;;){
-						if(isOutFree){
-							isOutFree = false;
-							for(UserDTO contact:contactUserList){
-								out.writeUTF(UserSessionService.getInstance().getContactQuery(contact));
-							}
-							isOutFree = true;
-							break;
-						}
+					
+					for(UserDTO contact:contactUserList){
+						sendMessage(out, UserSessionService.getInstance().getContactQuery(contact));
 					}
+					
+//					for(;;){
+//						if(isOutFree){
+//							isOutFree = false;
+//							for(UserDTO contact:contactUserList){
+//								out.writeUTF(UserSessionService.getInstance().getContactQuery(contact));
+//							}
+//							isOutFree = true;
+//							break;
+//						}
+//					}
 				}
 			}
 		} catch (IOException e) {
@@ -274,5 +311,29 @@ public class UserSession implements Runnable {
 	public UserDTO getUser() {
 		return user;
 	}
+	
+	private void sendMessage(DataOutputStream out, String message) throws IOException {
+		
+		int length = message.length();
+		byte [] toSend = message.getBytes();
+		byte [] lengthByte = new byte[4];
+		
+		lengthByte[0] = (byte)(length & 0xff);
+		lengthByte[1] = (byte)((length >> 8) & 0xff);
+		lengthByte[2] = (byte)((length >> 16) & 0xff);
+		lengthByte[3] = (byte)((length >> 24) & 0xff);
+		
+		for(;;){
+			if(isOutFree){
+				isOutFree = false;
+				out.write(lengthByte);
+				out.write(toSend);
+				isOutFree = true;
+				break;
+			}
+		}
+		
+	}
+	
 	
 }

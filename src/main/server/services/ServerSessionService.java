@@ -4,7 +4,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.LinkedList;
 import java.util.List;
 
 import main.dto.MessageDTO;
@@ -23,6 +22,7 @@ public class ServerSessionService {
 	
 	public void run(ServerSession session) {
 		ServerSocket serverSocket          = session.getServerSocket();
+		
 		List <UserSession> userSessionList = session.getUserSessionList();
 		List <Thread> sessionThreadList    = session.getSessionThreadList();
 		
@@ -64,10 +64,14 @@ public class ServerSessionService {
 		}
 	}
 	
-	private void sendMessage(MessageDTO message, DataOutputStream out) throws IOException{
+	private void sendMessage(MessageDTO message, UserSession session) throws IOException{
+		
 		String query = "msg:"+message.getMessage()+"&"+message.getFromLogin();
-		out.writeUTF(query);
+		sendQuery(query, session);
+		
 	}
+	
+	
 	
 	private void checkAndSendMessage() throws InterruptedException, IOException{
 		List <UserSession> sessionList = session.getUserSessionList();
@@ -78,17 +82,11 @@ public class ServerSessionService {
 				if(userSession.getSocket().isClosed()){
 					continue;
 				}
+				
 				if(userSession.getUser().getLogin().equals(message.getToLogin())){
-					while(true){
-						if(userSession.isOutFree()){
-							userSession.setOutFree(false);
-							sendMessage(message, userSession.getOut());
-							messageList.remove(i);
-							userSession.setOutFree(true);
-							break;
-						}
-						Thread.sleep(1);
-					}
+					
+					sendMessage(message, userSession);
+					messageList.remove(i);
 					
 					break;
 				}
@@ -96,6 +94,31 @@ public class ServerSessionService {
 			Thread.sleep(1);
 		}
 		Thread.sleep(1);
+	}
+	
+	private void sendQuery(String message, UserSession session) throws IOException {
+		
+		DataOutputStream out = session.getOut();
+		
+		int length = message.length();
+		byte [] toSend = message.getBytes();
+		byte [] lengthByte = new byte[4];
+		
+		lengthByte[0] = (byte)(length & 0xff);
+		lengthByte[1] = (byte)((length >> 8) & 0xff);
+		lengthByte[2] = (byte)((length >> 16) & 0xff);
+		lengthByte[3] = (byte)((length >> 24) & 0xff);
+		
+		for(;;){
+			if(session.isOutFree()){
+				session.setOutFree(false);
+				out.write(lengthByte);
+				out.write(toSend);
+				session.setOutFree(true);
+				break;
+			}
+		}
+		
 	}
 
 }

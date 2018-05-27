@@ -43,6 +43,7 @@ public class UserSessionService {
 		if(user == null){
 			throw new AuthException();
 		}
+		
 		if(!user.getPassword().equals(password)){
 			throw new AuthException();
 		}
