@@ -3,14 +3,12 @@ package main.database.dao.base;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import main.database.DBConnection;
-import main.dto.UserDTO;
 import main.dto.base.IDataTransferObject;
 import main.dto.base.ValueDTO;
 import main.dto.factories.base.IDTOFactory;
