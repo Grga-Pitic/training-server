@@ -38,6 +38,8 @@ public class UserSession implements Runnable {
 	private DataInputStream  in;
 	private DataOutputStream out;
 	
+	private boolean isToDelete;
+	
 	public UserSession(int id, Socket socket) throws IOException{
 		
 		this.id     = id;
@@ -48,6 +50,7 @@ public class UserSession implements Runnable {
 		this.messageList  = new ArrayList<MessageDTO>();
 		
 		this.isOutFree    = true;
+		this.isToDelete   = false;
 	}
 	
 	@Override
@@ -60,17 +63,16 @@ public class UserSession implements Runnable {
 			while(!socket.isClosed()){
 				String query;
 				try {
-//					query = in.readUTF();
 					
 					byte[] lenBytes = new byte[4];
 					in.read(lenBytes, 0, 4);
 					int len = (((lenBytes[3] & 0xff) << 24) | ((lenBytes[2] & 0xff) << 16) |
-			                  ((lenBytes[1] & 0xff) << 8) | (lenBytes[0] & 0xff));
+			                   ((lenBytes[1] & 0xff) << 8)  |  (lenBytes[0] & 0xff));
 
 					byte[] receivedBytes = new byte[len];
 					in.read(receivedBytes, 0, len);
 					query = new String(receivedBytes, 0, len);
-					
+			//		System.out.print(query+"\n");
 				} catch (EOFException e){
 					e.printStackTrace();
 					socket.close();
@@ -78,7 +80,6 @@ public class UserSession implements Runnable {
 					out.close();
 					break;
 				} catch (SocketException e) {
-//					e.printStackTrace();
 					socket.close();
 					in.close();
 					out.close();
@@ -107,30 +108,12 @@ public class UserSession implements Runnable {
 						
 						sendMessage(out, "You're registered!");
 						
-//						for(;;){
-//							if(isOutFree){
-//								isOutFree = false;
-//								out.writeUTF("You're registered!");
-//								out.flush();
-//								isOutFree = true;
-//								break;
-//							}
-//						}
-						
 					} catch (RegisterDataException e) {
 						
 						sendMessage(out, "Invalid registration data");
 						
-//						for(;;){
-//							if(isOutFree){
-//								isOutFree = false;
-//								out.writeUTF("Invalid registration data");
-//								out.flush();
-//								isOutFree = true;
-//								break;
-//							}
-//						}
 						e.printStackTrace();
+						
 					}
 					continue;
 				}
@@ -141,29 +124,9 @@ public class UserSession implements Runnable {
 						
 						sendMessage(out, "auth success!");
 						
-//						for(;;) {
-//							if(isOutFree){
-//								
-//								isOutFree = false;
-//								out.writeUTF("auth success!");
-//								out.flush();
-//								isOutFree = true;
-//								
-//								break;
-//							}
-//						}
 						
 					} catch (AuthException e) {
 						sendMessage(out, "Invalid login/password");
-//						for(;;){
-//							if(isOutFree){
-//								isOutFree = false;
-//								out.writeUTF("Invalid login/password");
-//								out.flush();
-//								isOutFree = true;
-//								break;
-//							}
-//						}
 						e.printStackTrace();
 					}
 					continue;
@@ -177,15 +140,6 @@ public class UserSession implements Runnable {
 						
 						sendMessage(out, "Invalid message");
 						
-//						for(;;){
-//							if(isOutFree){
-//								isOutFree = false;
-//								out.writeUTF("Invalid message");
-//								out.flush();
-//								isOutFree = true;
-//								break;
-//							}
-//						}
 						e.printStackTrace();
 					}
 					
@@ -229,17 +183,8 @@ public class UserSession implements Runnable {
 					contactList.add(contact);
 					
 					sendMessage(out, UserSessionService.getInstance().getContactQuery(friend));
-					
-//					for(;;){
-//						if(isOutFree){
-//							isOutFree = false;
-//							out.writeUTF(UserSessionService.getInstance().getContactQuery(friend));
-//							isOutFree = true;
-//							break;
-//						}
-//					}
-					
 					continue;
+					
 				}
 				
 				if(query.equals("contacts")){
@@ -250,16 +195,6 @@ public class UserSession implements Runnable {
 						sendMessage(out, UserSessionService.getInstance().getContactQuery(contact));
 					}
 					
-//					for(;;){
-//						if(isOutFree){
-//							isOutFree = false;
-//							for(UserDTO contact:contactUserList){
-//								out.writeUTF(UserSessionService.getInstance().getContactQuery(contact));
-//							}
-//							isOutFree = true;
-//							break;
-//						}
-//					}
 				}
 			}
 		} catch (IOException e) {
@@ -312,6 +247,14 @@ public class UserSession implements Runnable {
 		return user;
 	}
 	
+	public boolean isToDelete() {
+		return isToDelete;
+	}
+
+	public void setToDelete(boolean isToDelete) {
+		this.isToDelete = isToDelete;
+	}
+
 	private void sendMessage(DataOutputStream out, String message) throws IOException {
 		
 		int length = message.length();
@@ -323,15 +266,18 @@ public class UserSession implements Runnable {
 		lengthByte[2] = (byte)((length >> 16) & 0xff);
 		lengthByte[3] = (byte)((length >> 24) & 0xff);
 		
-		for(;;){
-			if(isOutFree){
-				isOutFree = false;
-				out.write(lengthByte);
-				out.write(toSend);
-				isOutFree = true;
-				break;
-			}
-		}
+		out.write(lengthByte);
+		out.write(toSend);
+		
+//		for(;;){
+//			if(isOutFree){
+//				isOutFree = false;
+//				out.write(lengthByte);
+//				out.write(toSend);
+//				isOutFree = true;
+//				break;
+//			}
+//		}
 		
 	}
 	

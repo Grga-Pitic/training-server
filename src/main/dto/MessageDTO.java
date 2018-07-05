@@ -11,6 +11,20 @@ public class MessageDTO extends AbstractDTO implements IDataTransferObject {
 	private String fromLogin;
 	private String toLogin;
 	
+	private boolean isSent;
+	
+	public MessageDTO() {
+		this.isSent = false;
+	}
+	
+	public boolean isSent() {
+		return isSent;
+	}
+
+	public void setSent(boolean isSent) {
+		this.isSent = isSent;
+	}
+
 	@Override
 	public void setSerializedData(Map <String, ValueDTO> data){
 		super.setSerializedData(data);

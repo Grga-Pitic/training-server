@@ -23,8 +23,8 @@ public class Activator {
 		DBConnection connection = (DBConnection)context.getBean("DBConnection");
 		connection.open();
 		
-		Map<Object, UserDTO>    users     = connection.getUsersDAO().executeSelectQuery("select * from users");
-		Map<Object, ContactDTO> contacts  = connection.getContactsDAO().executeSelectQuery("select * from contacts");
+		Map<Object, UserDTO>    users       = connection.getUsersDAO().executeSelectQuery("select * from users");
+		Map<Object, ContactDTO> contacts    = connection.getContactsDAO().executeSelectQuery("select * from contacts");
 		List<ContactDTO>        contactList = new LinkedList<ContactDTO>();
 		
 		for(Object id:contacts.keySet()){
