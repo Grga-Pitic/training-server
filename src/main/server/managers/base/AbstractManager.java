@@ -1,39 +1,21 @@
 package main.server.managers.base;
 
 import java.io.IOException;
-import java.util.List;
 
-import main.server.ServerSession;
-import main.server.UserSession;
-import main.server.services.ServerSessionService;
+import main.server.Server;
 
 public abstract class AbstractManager implements IManager {
 	
-	private ServerSession serverSession;
+	private Server serverSession;
 	
-	public AbstractManager(ServerSession serverSession) {
+	public AbstractManager(Server serverSession) {
 		
 		this.serverSession = serverSession;
 		
 	}
 	
-	protected int closeUserSession() {
-		int sessionCounter = 0;
-		
-		// TODO
-		
-		return sessionCounter;
-	}
-	
 	protected void closeSession() throws IOException {
 		
-		List <UserSession> userSessionList = serverSession.getUserSessionList();
-		
-		for(UserSession session:userSessionList) {
-			if(!session.getSocket().isClosed()){
-				session.getSocket().close();
-			}
-		}
 		serverSession.getServerSocket().close();
 		
 	}
@@ -43,8 +25,7 @@ public abstract class AbstractManager implements IManager {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				ServerSessionService serverService = new ServerSessionService(serverSession);
-				serverService.run(serverSession);
+				serverSession.run();
 			}
 		}).start();
 		

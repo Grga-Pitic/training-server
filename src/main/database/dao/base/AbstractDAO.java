@@ -47,7 +47,6 @@ public class AbstractDAO {
 	}
 	
 	protected ResultSet executeQuery(String query) throws SQLException{
-		
 		Statement statement = DBConnection.getInstance().getStatement();
 		statement.executeQuery(query);
 		ResultSet resultSet = statement.executeQuery(query);

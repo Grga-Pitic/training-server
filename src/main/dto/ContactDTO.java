@@ -11,6 +11,20 @@ public class ContactDTO extends AbstractDTO implements IDataTransferObject {
 	private int userid1;
 	private int userid2;
 	
+	public ContactDTO(){
+		Map<String, ValueDTO> data = super.getSerializedData();
+		
+		ValueDTO column = new ValueDTO("VARCHAR");
+		data.put("userid1", column);
+		
+		column = new ValueDTO("VARCHAR");
+		data.put("userid2", column);
+		
+		column = new ValueDTO("INT");
+		column.setValue("-1");
+		data.put("id", column);
+	}
+	
 	@Override
 	public void setSerializedData(Map <String, ValueDTO> data){
 		

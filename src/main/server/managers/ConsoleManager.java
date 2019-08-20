@@ -3,15 +3,13 @@ package main.server.managers;
 import java.io.IOException;
 import java.util.Scanner;
 
-import javax.management.InstanceAlreadyExistsException;
-
-import main.server.ServerSession;
+import main.server.Server;
 import main.server.managers.base.AbstractManager;
 import main.server.managers.base.IManager;
 
 public class ConsoleManager extends AbstractManager implements IManager {
 	
-	public ConsoleManager(ServerSession serverSession) {
+	public ConsoleManager(Server serverSession) {
 		super(serverSession);
 	}
 

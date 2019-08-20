@@ -1,9 +1,14 @@
 package main.dto.base;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class AbstractDTO {
 	private Map <String, ValueDTO> data;
+	
+	public AbstractDTO(){
+		this.data = new HashMap<String, ValueDTO>();
+	}
 
 	protected void put(String columnName, String newValue){
 		ValueDTO value = data.get(columnName);

@@ -12,6 +12,23 @@ public class UserDTO extends AbstractDTO implements IDataTransferObject {
 	private String nickname;
 	private String password;
 	
+	public UserDTO(){
+		Map<String, ValueDTO> data = super.getSerializedData();
+		ValueDTO column = new ValueDTO("VARCHAR");
+		data.put("login", column);
+		
+		column = new ValueDTO("VARCHAR");
+		data.put("password", column);
+		
+		column = new ValueDTO("VARCHAR");
+		data.put("nickname", column);
+		
+		column = new ValueDTO("INT");
+		column.setValue("-1");
+		data.put("id", column);
+		
+	}
+	
 	@Override
 	public void setSerializedData(Map <String, ValueDTO> data){
 
